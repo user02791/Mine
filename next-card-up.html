@@ -1,0 +1,960 @@
+<title>Next Card Up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --ground:#E8E9E5;
+  --surface:#FBFBF9;
+  --surface-2:#F1F2EE;
+  --ink:#17191B;
+  --ink-2:#43484D;
+  --muted:#6E747B;
+  --line:#D3D6D0;
+  --line-2:#BFC3BC;
+  --signal:#9A6B12;
+  --signal-bg:#F5E9CC;
+  --push:#A83527;
+  --pull:#28518B;
+  --legs:#37633E;
+  --push-bg:#F6E4E1;
+  --pull-bg:#E2E9F4;
+  --legs-bg:#E1EBE3;
+
+  --f-display:"Anton","Haettenschweiler","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+
+  --w:min(100% - 2rem, 60rem);
+  --w-prose:min(100% - 2rem, 40rem);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#121416;
+    --surface:#1A1D20;
+    --surface-2:#22262A;
+    --ink:#E9EAE6;
+    --ink-2:#B6BBBE;
+    --muted:#878D94;
+    --line:#2E3338;
+    --line-2:#3E444A;
+    --signal:#E3AE3C;
+    --signal-bg:#2E2617;
+    --push:#E0705B;
+    --pull:#7BA5E4;
+    --legs:#79B481;
+    --push-bg:#2B1A17;
+    --pull-bg:#161F2C;
+    --legs-bg:#17241A;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#121416;
+  --surface:#1A1D20;
+  --surface-2:#22262A;
+  --ink:#E9EAE6;
+  --ink-2:#B6BBBE;
+  --muted:#878D94;
+  --line:#2E3338;
+  --line-2:#3E444A;
+  --signal:#E3AE3C;
+  --signal-bg:#2E2617;
+  --push:#E0705B;
+  --pull:#7BA5E4;
+  --legs:#79B481;
+  --push-bg:#2B1A17;
+  --pull-bg:#161F2C;
+  --legs-bg:#17241A;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.6;
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+p{margin:0}
+a{color:inherit}
+
+.wrap{width:var(--w);margin-inline:auto}
+.prose{width:var(--w-prose);margin-inline:auto}
+.stack{display:flex;flex-direction:column}
+.g-2{gap:.5rem}.g-3{gap:.75rem}.g-4{gap:1rem}.g-5{gap:1.5rem}.g-6{gap:2rem}.g-8{gap:3rem}
+
+.eyebrow{
+  font-family:var(--f-mono);
+  font-size:.72rem;
+  font-weight:600;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* ---------- sticky rotation bar ---------- */
+.bar{
+  position:sticky;top:0;z-index:50;
+  background:var(--surface);
+  border-bottom:1px solid var(--line);
+}
+.bar-in{
+  width:var(--w);margin-inline:auto;
+  display:flex;align-items:center;gap:.75rem;
+  padding:.6rem 0;
+  flex-wrap:wrap;
+}
+.bar-label{
+  font-family:var(--f-mono);font-size:.68rem;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+}
+.bar-card{
+  font-family:var(--f-display);font-size:1.35rem;line-height:1;
+  letter-spacing:.02em;
+}
+.bar-spacer{flex:1}
+.jump{display:flex;gap:.35rem}
+.jump a{
+  font-family:var(--f-mono);font-size:.8rem;font-weight:600;
+  text-decoration:none;
+  width:2rem;height:2rem;display:grid;place-items:center;
+  border:1px solid var(--line-2);border-radius:2px;
+  color:var(--ink-2);
+}
+.jump a:hover{background:var(--surface-2)}
+.btn{
+  font-family:var(--f-mono);font-size:.75rem;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;
+  background:var(--ink);color:var(--ground);
+  border:0;border-radius:2px;padding:.5rem .8rem;cursor:pointer;
+}
+.btn:hover{opacity:.85}
+.btn-ghost{
+  background:transparent;color:var(--muted);
+  border:1px solid var(--line-2);
+}
+:is(a,button,input,summary):focus-visible{
+  outline:2px solid var(--signal);outline-offset:2px;
+}
+
+/* ---------- hero ---------- */
+.hero{padding:3.5rem 0 2.5rem;border-bottom:1px solid var(--line)}
+.wordmark{
+  font-family:var(--f-display);
+  font-size:clamp(3rem,13vw,6.5rem);
+  line-height:.86;letter-spacing:.005em;
+  text-transform:uppercase;
+}
+.wordmark .dim{color:var(--muted)}
+.lede{font-size:1.15rem;color:var(--ink-2);max-width:34rem}
+.rule-box{
+  border-left:3px solid var(--signal);
+  background:var(--signal-bg);
+  padding:1rem 1.1rem;
+  max-width:38rem;
+}
+.rule-box p{font-size:1.02rem}
+
+/* ---------- generic section ---------- */
+section{padding:3rem 0;border-bottom:1px solid var(--line)}
+.sec-head{margin-bottom:1.5rem}
+h2{
+  font-family:var(--f-body);font-weight:700;
+  font-size:clamp(1.45rem,4vw,2rem);
+  line-height:1.15;letter-spacing:-.015em;
+}
+h3{
+  font-family:var(--f-body);font-weight:700;
+  font-size:1.05rem;letter-spacing:-.005em;
+}
+.sub{color:var(--muted);font-size:.95rem}
+.body p{color:var(--ink-2)}
+.body strong{color:var(--ink);font-weight:600}
+
+/* ---------- workout cards ---------- */
+.deck{display:flex;flex-direction:column;gap:1.25rem}
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-top:4px solid var(--accent);
+  scroll-margin-top:4.5rem;
+}
+.card[data-card="A"]{--accent:var(--push);--accent-bg:var(--push-bg)}
+.card[data-card="B"]{--accent:var(--pull);--accent-bg:var(--pull-bg)}
+.card[data-card="C"]{--accent:var(--legs);--accent-bg:var(--legs-bg)}
+.card-head{
+  display:flex;align-items:baseline;gap:.85rem;
+  padding:1rem 1.1rem .85rem;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.card-letter{
+  font-family:var(--f-display);
+  font-size:2.6rem;line-height:.8;
+  color:var(--accent);
+}
+.card-name{font-family:var(--f-body);font-weight:700;font-size:1.15rem;letter-spacing:-.01em}
+.card-meta{
+  margin-left:auto;
+  font-family:var(--f-mono);font-size:.72rem;font-weight:500;
+  color:var(--muted);letter-spacing:.05em;text-transform:uppercase;
+}
+
+.ex{
+  display:grid;
+  grid-template-columns:1.6rem 1fr auto;
+  gap:.15rem .7rem;
+  padding:.8rem 1.1rem;
+  border-bottom:1px solid var(--line);
+  align-items:baseline;
+}
+.ex:last-child{border-bottom:0}
+.ex.floor{background:var(--accent-bg)}
+.ex-n{
+  font-family:var(--f-mono);font-size:.8rem;font-weight:600;
+  color:var(--accent);
+}
+.ex-name{font-weight:600;font-size:.98rem;line-height:1.35}
+.ex-dose{
+  font-family:var(--f-mono);font-size:.85rem;font-weight:600;
+  white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+.ex-note{
+  grid-column:2/-1;
+  font-size:.83rem;color:var(--muted);line-height:1.45;
+}
+.ex-log{
+  grid-column:2/-1;
+  display:flex;align-items:center;gap:.45rem;margin-top:.35rem;
+}
+.ex-log label{
+  font-family:var(--f-mono);font-size:.66rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+}
+.ex-log input{
+  font-family:var(--f-mono);font-size:.85rem;font-weight:600;
+  background:var(--surface-2);color:var(--ink);
+  border:1px solid var(--line);border-radius:2px;
+  padding:.3rem .45rem;width:9rem;max-width:100%;
+}
+.ex-log input::placeholder{color:var(--muted);font-weight:400}
+.card-foot{
+  padding:.75rem 1.1rem;
+  background:var(--accent-bg);
+  font-size:.85rem;color:var(--ink-2);
+  border-top:1px solid var(--line);
+}
+.card-foot b{color:var(--ink)}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:34rem}
+th,td{
+  text-align:left;padding:.6rem .8rem;
+  border-bottom:1px solid var(--line);
+  font-size:.9rem;vertical-align:top;
+}
+thead th{
+  font-family:var(--f-mono);font-size:.68rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  background:var(--surface-2);
+  border-bottom:1px solid var(--line-2);
+}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- misc blocks ---------- */
+.callout{
+  border:1px solid var(--line);border-left:3px solid var(--signal);
+  background:var(--surface);padding:.95rem 1.1rem;
+}
+.callout .eyebrow{color:var(--signal);margin-bottom:.3rem;display:block}
+ul.tight{margin:0;padding-left:1.15rem;color:var(--ink-2)}
+ul.tight li{margin-bottom:.4rem}
+ul.tight li::marker{color:var(--muted)}
+ul.tight strong{color:var(--ink);font-weight:600}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+.grid2{display:grid;grid-template-columns:1fr;gap:1rem}
+@media(min-width:44rem){.grid2{grid-template-columns:1fr 1fr}}
+.tile{
+  background:var(--surface);border:1px solid var(--line);
+  padding:1rem 1.1rem;
+}
+.tile h3{margin-bottom:.4rem}
+.tile p{font-size:.92rem;color:var(--ink-2)}
+
+/* ---------- calc ---------- */
+.calc{
+  background:var(--surface);border:1px solid var(--line);
+  border-left:3px solid var(--signal);
+  padding:1.1rem;
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:1rem;
+}
+.calc-field{display:flex;flex-direction:column;gap:.3rem}
+.calc-field label{
+  font-family:var(--f-mono);font-size:.66rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+}
+.calc-field input{
+  font-family:var(--f-mono);font-size:1.15rem;font-weight:600;
+  background:var(--surface-2);color:var(--ink);
+  border:1px solid var(--line-2);border-radius:2px;
+  padding:.4rem .55rem;width:7rem;
+}
+.calc-out{
+  font-family:var(--f-mono);font-size:1.05rem;font-weight:600;
+  color:var(--signal);line-height:1.4;
+}
+.calc-out span{display:block;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);font-weight:600}
+
+footer{padding:2.5rem 0 3.5rem;color:var(--muted);font-size:.85rem}
+footer p{max-width:38rem}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="bar">
+  <div class="bar-in">
+    <span class="bar-label">Next up</span>
+    <span class="bar-card" id="nextCard">A &middot; Push</span>
+    <button class="btn" id="doneBtn">Did it &rarr;</button>
+    <span class="bar-spacer"></span>
+    <nav class="jump" aria-label="Jump to workout">
+      <a href="#cardA">A</a><a href="#cardB">B</a><a href="#cardC">C</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap stack g-5">
+    <div class="stack g-4">
+      <span class="eyebrow">A training plan built for the way you actually show up</span>
+      <h1 class="wordmark">Next<br>Card<br><span class="dim">Up</span></h1>
+    </div>
+    <p class="lede">Three workouts on a loop. Whichever one you did last, you do the next one &mdash;
+      today, Thursday, or eleven days from now. There are no weeks in this plan, so there is
+      nothing to fall behind on.</p>
+    <div class="rule-box">
+      <p><strong>You have not failed at training. You have failed at calendars.</strong>
+      Every plan you have quit had a shape you were supposed to fit into &mdash; push Monday, pull
+      Wednesday, legs Friday. Miss Wednesday and the week is ruined, so you skip Friday too, and
+      by day nine you are starting over. This plan has no shape to fall out of.</p>
+    </div>
+  </div>
+</header>
+
+<section id="read">
+  <div class="wrap stack g-5">
+    <div class="sec-head stack g-2">
+      <span class="eyebrow">Where you actually are</span>
+      <h2>What the photos show</h2>
+    </div>
+    <div class="prose stack g-4 body" style="margin-inline:0">
+      <p>The change across those five images is not small. The first one and the last one are not
+        the same person's body composition. Whatever you think you have been failing at, the
+        pictures disagree.</p>
+      <p><strong>Arms and delts are your strength.</strong> Real arm mass, and the side delts have
+        an actual cap on them in the recent shots. That is not nothing &mdash; delts are stubborn
+        on most people.</p>
+      <p><strong>Back has width now.</strong> Compare the lat flare in the first photo to the last
+        two. Upper back is filling in. This matters more than you think, and I will come back to it.</p>
+      <p><strong>The midsection is the last stop, and that is not a discipline problem.</strong>
+        Men store fat centrally and clear it centrally last. With both parents built the way you
+        described, your distribution genuinely favors the stomach. You are not doing something
+        wrong that other guys are doing right &mdash; you are running the same fat loss on a
+        different map.</p>
+      <p>Rough read on the last photo: somewhere in the high teens to low twenties percent body
+        fat. Most men do not see abs until roughly 12&ndash;15%. So the gap is real, but it is a
+        gap measured in the tens of pounds, not a reason to start over.</p>
+    </div>
+    <div class="callout prose" style="margin-inline:0">
+      <span class="eyebrow">The lever nobody tells you about</span>
+      <p style="color:var(--ink-2)">The fastest visual change to your waist is not made at your
+        waist. It is made at your <strong style="color:var(--ink)">lats and side delts</strong>.
+        A waist looks narrow by contrast, not by measurement. You already have proof of this: your
+        arm-and-shoulder photo reads leaner than your back photos taken at a similar weight. Widen
+        the top, and the middle shrinks on camera before it shrinks on the tape.</p>
+    </div>
+  </div>
+</section>
+
+<section id="deck">
+  <div class="wrap stack g-5">
+    <div class="sec-head stack g-2">
+      <span class="eyebrow">The deck &mdash; three cards, on a loop</span>
+      <h2>Your only in-gym decision is which card is next</h2>
+      <p class="sub">Every card is five exercises, roughly 30&ndash;35 minutes, and ends with arms
+        so you always leave with a pump. Rest 2 minutes on exercise 1, 90 seconds on 2&ndash;3,
+        45&ndash;60 seconds on the rest. Log only your hardest set &mdash; one number, in the box.</p>
+    </div>
+
+    <div class="deck">
+
+      <article class="card" data-card="A" id="cardA">
+        <div class="card-head">
+          <span class="card-letter">A</span>
+          <span class="card-name">Push</span>
+          <span class="card-meta">14 sets &middot; ~33 min</span>
+        </div>
+        <div class="ex floor">
+          <span class="ex-n">1</span>
+          <span class="ex-name">Incline dumbbell press</span>
+          <span class="ex-dose">3 &times; 6&ndash;10</span>
+          <span class="ex-note">Bench around 30&deg;. You already do this one &mdash; it is your best chest movement and you never have to touch a barbell.</span>
+          <span class="ex-log"><label for="l-A1">Last</label><input id="l-A1" data-k="A1" placeholder="e.g. 55s &times; 8"></span>
+        </div>
+        <div class="ex floor">
+          <span class="ex-n">2</span>
+          <span class="ex-name">Machine chest press or pec deck</span>
+          <span class="ex-dose">2 &times; 10&ndash;15</span>
+          <span class="ex-note">Machine on purpose. No setup, no stabilizing, no thinking. Take it close to failure.</span>
+          <span class="ex-log"><label for="l-A2">Last</label><input id="l-A2" data-k="A2" placeholder="e.g. 140 &times; 12"></span>
+        </div>
+        <div class="ex">
+          <span class="ex-n">3</span>
+          <span class="ex-name">Seated dumbbell overhead press</span>
+          <span class="ex-dose">3 &times; 8&ndash;12</span>
+          <span class="ex-note">The one you already do. Keep doing it.</span>
+          <span class="ex-log"><label for="l-A3">Last</label><input id="l-A3" data-k="A3" placeholder="e.g. 45s &times; 10"></span>
+        </div>
+        <div class="ex">
+          <span class="ex-n">4</span>
+          <span class="ex-name">Dumbbell lateral raise</span>
+          <span class="ex-dose">3 &times; 12&ndash;20</span>
+          <span class="ex-note">Light, slow, elbows leading. This is a waist-narrowing exercise disguised as a shoulder exercise.</span>
+          <span class="ex-log"><label for="l-A4">Last</label><input id="l-A4" data-k="A4" placeholder="e.g. 20s &times; 15"></span>
+        </div>
+        <div class="ex">
+          <span class="ex-n">5</span>
+          <span class="ex-name">Triceps pushdown <em>or</em> EZ-bar overhead extension</span>
+          <span class="ex-dose">3 &times; 10&ndash;15</span>
+          <span class="ex-note">Whichever station is free. Do not walk around looking for the other one.</span>
+          <span class="ex-log"><label for="l-A5">Last</label><input id="l-A5" data-k="A5" placeholder="e.g. 70 &times; 13"></span>
+        </div>
+        <p class="card-foot"><b>The floor:</b> no time, no motivation, bad day &rarr; do the two
+          shaded exercises and leave. It counts. Advance the card.</p>
+      </article>
+
+      <article class="card" data-card="B" id="cardB">
+        <div class="card-head">
+          <span class="card-letter">B</span>
+          <span class="card-name">Pull</span>
+          <span class="card-meta">13 sets &middot; ~32 min</span>
+        </div>
+        <div class="ex floor">
+          <span class="ex-n">1</span>
+          <span class="ex-name">Lat pulldown</span>
+          <span class="ex-dose">3 &times; 8&ndash;12</span>
+          <span class="ex-note">Grip slightly wider than shoulders. Drive elbows down and back, let the stretch happen at the top. This is the waist-narrowing lever &mdash; treat it as the most important set of the week.</span>
+          <span class="ex-log"><label for="l-B1">Last</label><input id="l-B1" data-k="B1" placeholder="e.g. 150 &times; 10"></span>
+        </div>
+        <div class="ex floor">
+          <span class="ex-n">2</span>
+          <span class="ex-name">Chest-supported row or seated cable row</span>
+          <span class="ex-dose">3 &times; 8&ndash;12</span>
+          <span class="ex-note">Chest-supported if the machine exists &mdash; no lower-back fatigue, no form decisions.</span>
+          <span class="ex-log"><label for="l-B2">Last</label><input id="l-B2" data-k="B2" placeholder="e.g. 130 &times; 11"></span>
+        </div>
+        <div class="ex">
+          <span class="ex-n">3</span>
+          <span class="ex-name">Rear-delt fly (machine or dumbbell)</span>
+          <span class="ex-dose">2 &times; 15&ndash;20</span>
+          <span class="ex-note">Light. Rear delts finish the shoulder from behind and improve how you stand.</span>
+          <span class="ex-log"><label for="l-B3">Last</label><input id="l-B3" data-k="B3" placeholder="e.g. 50 &times; 18"></span>
+        </div>
+        <div class="ex">
+          <span class="ex-n">4</span>
+          <span class="ex-name">EZ-bar curl</span>
+          <span class="ex-dose">3 &times; 8&ndash;12</span>
+          <span class="ex-note">Your bicep bar. No swinging &mdash; if your hips move, the weight is picked for your ego.</span>
+          <span class="ex-log"><label for="l-B4">Last</label><input id="l-B4" data-k="B4" placeholder="e.g. 65 &times; 10"></span>
+        </div>
+        <div class="ex">
+          <span class="ex-n">5</span>
+          <span class="ex-name">Dumbbell hammer curl, both arms</span>
+          <span class="ex-dose">2 &times; 10&ndash;15</span>
+          <span class="ex-note">Exactly how you already do them. Hammers build the brachialis, which is what pushes the bicep up.</span>
+          <span class="ex-log"><label for="l-B5">Last</label><input id="l-B5" data-k="B5" placeholder="e.g. 35s &times; 12"></span>
+        </div>
+        <p class="card-foot"><b>The floor:</b> pulldown and row only. Two exercises, twelve minutes,
+          still counts.</p>
+      </article>
+
+      <article class="card" data-card="C" id="cardC">
+        <div class="card-head">
+          <span class="card-letter">C</span>
+          <span class="card-name">Legs + Arms</span>
+          <span class="card-meta">14 sets &middot; ~32 min</span>
+        </div>
+        <div class="ex floor">
+          <span class="ex-n">1</span>
+          <span class="ex-name">Leg press</span>
+          <span class="ex-dose">3 &times; 8&ndash;15</span>
+          <span class="ex-note">Feet mid-platform, go to about 90&deg; at the knee. First three weeks: 2 sets only, and stop 3 reps short. Soreness is the reason you never came back last time.</span>
+          <span class="ex-log"><label for="l-C1">Last</label><input id="l-C1" data-k="C1" placeholder="e.g. 270 &times; 12"></span>
+        </div>
+        <div class="ex floor">
+          <span class="ex-n">2</span>
+          <span class="ex-name">Hamstring curl machine</span>
+          <span class="ex-dose">3 &times; 10&ndash;15</span>
+          <span class="ex-note">Hamstrings and glutes pull your pelvis out of a forward tilt. That tilt is making your stomach push forward more than the fat alone does.</span>
+          <span class="ex-log"><label for="l-C2">Last</label><input id="l-C2" data-k="C2" placeholder="e.g. 90 &times; 12"></span>
+        </div>
+        <div class="ex">
+          <span class="ex-n">3</span>
+          <span class="ex-name">Leg extension</span>
+          <span class="ex-dose">2 &times; 12&ndash;20</span>
+          <span class="ex-note">Optional if you are wrecked. Skip it before you skip anything above it.</span>
+          <span class="ex-log"><label for="l-C3">Last</label><input id="l-C3" data-k="C3" placeholder="e.g. 110 &times; 15"></span>
+        </div>
+        <div class="ex">
+          <span class="ex-n">4</span>
+          <span class="ex-name">Dumbbell curl + triceps pushdown, back to back</span>
+          <span class="ex-dose">3 &times; 10&ndash;15</span>
+          <span class="ex-note">Curl a set, pushdown a set, no rest between them. This is your reward for showing up to leg day and it costs six minutes.</span>
+          <span class="ex-log"><label for="l-C4">Last</label><input id="l-C4" data-k="C4" placeholder="e.g. 40s &times; 11"></span>
+        </div>
+        <div class="ex">
+          <span class="ex-n">5</span>
+          <span class="ex-name">Cable crunch or lying leg raise</span>
+          <span class="ex-dose">2 &times; 10&ndash;20</span>
+          <span class="ex-note">Not for fat loss &mdash; that is not how it works. This is so there is something worth seeing when the fat does come off.</span>
+          <span class="ex-log"><label for="l-C5">Last</label><input id="l-C5" data-k="C5" placeholder="e.g. 60 &times; 15"></span>
+        </div>
+        <p class="card-foot"><b>The floor:</b> leg press and hamstring curl. Then go home. You still
+          trained legs, which is more than the last several years.</p>
+      </article>
+
+    </div>
+
+    <div class="grid2">
+      <div class="tile">
+        <h3>How often</h3>
+        <p>Three or four sessions per seven days. Two is a holding pattern that still keeps your
+          muscle. Five is fine but unnecessary. The deck does not care &mdash; it only advances when
+          you train.</p>
+      </div>
+      <div class="tile">
+        <h3>Why arms are in every card</h3>
+        <p>Partly because arms recover fast and take frequency well. Mostly because arms are the
+          thing that gets you through the door, and a plan you attend beats a better plan you skip.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="overload">
+  <div class="wrap stack g-5">
+    <div class="sec-head stack g-2">
+      <span class="eyebrow">Progressive overload</span>
+      <h2>Add reps until the top of the range, then add weight. That is the entire system.</h2>
+    </div>
+
+    <div class="prose stack g-4 body" style="margin-inline:0">
+      <p>It is called double progression, and it exists so that you never have to decide anything
+        in the gym. Every exercise has a rep range. You have one job.</p>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">The rule</span>
+      <ul class="tight" style="margin-top:.5rem">
+        <li>Pick a weight you can do for the <strong>bottom</strong> of the range with about two
+          reps left in you.</li>
+        <li>Every session, try to add one rep to your top set. Not weight &mdash; <strong>reps</strong>.</li>
+        <li>When you hit the <strong>top</strong> of the range on <strong>every</strong> set,
+          go up in weight next session.</li>
+        <li>Your reps will drop when you go up. That is correct. Climb back up the range and
+          repeat forever.</li>
+      </ul>
+    </div>
+
+    <div class="stack g-3">
+      <h3>How much to go up</h3>
+      <p class="sub">The right jump is roughly 2.5&ndash;5% of the load. On small muscles the
+        smallest dumbbell in the rack is already a huge jump, which is why the rep ranges on
+        isolation work are wider.</p>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>Movement</th><th>Go up by</th><th>Reps will drop</th><th>Expect a jump every</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Leg press</td><td class="num">+10&ndash;20 lb</td><td class="num">2&ndash;4</td><td>1&ndash;2 weeks at first</td></tr>
+            <tr><td>Machine chest press, row, pulldown</td><td class="num">+5&ndash;10 lb (one pin)</td><td class="num">1&ndash;3</td><td>3&ndash;5 weeks</td></tr>
+            <tr><td>Incline DB press, DB overhead press</td><td class="num">+5 lb per hand</td><td class="num">2&ndash;4</td><td>6&ndash;10 weeks</td></tr>
+            <tr><td>EZ-bar curl</td><td class="num">+5 lb on the bar</td><td class="num">2&ndash;3</td><td>4&ndash;8 weeks</td></tr>
+            <tr><td>DB curl, hammer curl</td><td class="num">+5 lb per hand</td><td class="num">3&ndash;5</td><td>8&ndash;12 weeks</td></tr>
+            <tr><td>Lateral raise, rear-delt fly</td><td class="num">+5 lb per hand</td><td class="num">5+</td><td>Push reps to 25 first</td></tr>
+            <tr><td>Hamstring curl, leg extension</td><td class="num">+5&ndash;10 lb</td><td class="num">2&ndash;4</td><td>3&ndash;5 weeks</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="sub">On lateral raises specifically: 20 lb to 25 lb is a 25% jump. Never jump a
+        lateral raise on schedule &mdash; ride the reps up to 25 first, then take the next dumbbell
+        and start again at 12.</p>
+    </div>
+
+    <div class="stack g-3">
+      <h3>What a real year looks like</h3>
+      <div class="prose body stack g-3" style="margin-inline:0">
+        <p>You are natural, you are not a beginner, and you are in a calorie deficit. Here is the
+          honest arithmetic so you stop measuring yourself against a fantasy:</p>
+        <ul class="tight">
+          <li><strong>Weeks 1&ndash;4:</strong> numbers climb fast on almost everything. Most of
+            that is skill and confidence with the movement, not new muscle. Enjoy it, do not
+            extrapolate it.</li>
+          <li><strong>Months 2&ndash;6, in a deficit:</strong> holding your numbers <em>is</em> the
+            progress. If you weigh 18 lb less and still press the same dumbbells for the same reps,
+            you kept your muscle through a cut. That is the win condition.</li>
+          <li><strong>A good year, eating enough:</strong> maybe +10&ndash;15 lb per hand on a
+            dumbbell press, +5&ndash;10 lb on curls, +60&ndash;100 lb on a leg press. Those numbers
+            look small written down and they look enormous on a body.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="deficit">
+  <div class="wrap stack g-5">
+    <div class="sec-head stack g-2">
+      <span class="eyebrow">The thing you noticed</span>
+      <h2>Why you got weaker in the gym at the exact moment you started looking better</h2>
+    </div>
+    <div class="prose stack g-4 body" style="margin-inline:0">
+      <p>You described this precisely: you cut, you looked better than you had in years, and your
+        lifts fell off a cliff. That is not you losing muscle. In order of how much it is costing
+        you:</p>
+      <ul class="tight">
+        <li><strong>Glycogen.</strong> Muscle stores carbohydrate, and each gram of it holds about
+          three grams of water. Eat less, store less, and your muscles are literally smaller,
+          flatter and less powerful &mdash; without a single fiber being lost.</li>
+        <li><strong>Recovery debt.</strong> A deficit slows tissue repair. The same session that
+          used to leave you fine now leaves you three-quarters recovered when the next one arrives,
+          and it compounds.</li>
+        <li><strong>Leverage.</strong> You genuinely have less body to press against. This is most
+          obvious on pressing, which is one of several reasons you can stop worrying about the
+          bench press forever.</li>
+        <li><strong>On a GLP-1 specifically:</strong> you are eating very little food, which means
+          very little carbohydrate, and &mdash; the one almost nobody catches &mdash; very little
+          <strong>sodium</strong>. Low sodium means low blood volume, which means flat pumps,
+          light-headedness on standing, and dead sets.</li>
+      </ul>
+      <p>So the fix is not to push harder. Pushing harder into a recovery deficit is how the last
+        several attempts ended.</p>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">What to do instead</span>
+      <ul class="tight" style="margin-top:.5rem">
+        <li><strong>Change the win condition.</strong> While the scale is moving down, your goal is
+          to <em>keep the same numbers</em>, not add to them. Write that down somewhere.</li>
+        <li><strong>Put carbs in front of the session.</strong> 30&ndash;60 g, 60&ndash;90 minutes
+          before. On a GLP-1 your stomach empties slowly, so drink them &mdash; juice, a shake with
+          a banana, a sports drink. This one change will noticeably bring your sets back.</li>
+        <li><strong>Salt your food.</strong> Deliberately. You are almost certainly under-eating
+          sodium now that you are barely eating.</li>
+        <li><strong>Creatine, 5 g a day, every day.</strong> Cheapest, most-studied, fully natural.
+          It preserves performance in a deficit. It will also put 2&ndash;4 lb of water
+          <em>inside</em> your muscles &mdash; that is a scale increase that means you are winning.</li>
+        <li><strong>Slow down if it does not recover.</strong> See the trigger below.</li>
+      </ul>
+    </div>
+
+    <div class="callout" style="border-left-color:var(--push)">
+      <span class="eyebrow" style="color:var(--push)">The back-off trigger</span>
+      <p style="color:var(--ink-2)">If your top set drops <strong style="color:var(--ink)">2 or
+        more reps at the same weight, on two sessions in a row, across two or more different
+        exercises</strong> &mdash; that is not laziness and it is not a bad day. That is your
+        recovery telling you the deficit is too steep. Eat more carbs, sleep, or slow the rate of
+        loss. Do not try to out-discipline it.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tracking">
+  <div class="wrap stack g-5">
+    <div class="sec-head stack g-2">
+      <span class="eyebrow">Measuring</span>
+      <h2>Your 5-pound daily swing is noise, and it is making you crazy</h2>
+    </div>
+    <div class="prose stack g-4 body" style="margin-inline:0">
+      <p>Sodium, carbohydrate, stress, sleep, whether you have been to the bathroom &mdash; a
+        five-pound day-to-day range is completely normal and contains almost no information about
+        fat. Reading it daily is like judging the climate from this afternoon.</p>
+      <p><strong>Weigh every morning anyway</strong> &mdash; same time, after the bathroom, before
+        food. But never look at a single number. Look only at the <strong>7-day rolling
+        average</strong>, and compare it to last week's average. Any scale app or a spreadsheet
+        column does this for you. One week of average-versus-average is a real data point. One
+        morning is not.</p>
+      <p><strong>Take a tape measure to your navel once a week.</strong> Same morning, standing,
+        normal exhale, no sucking in. For what you actually care about, waist circumference is a
+        far better instrument than bodyweight &mdash; it moves when fat moves and it ignores
+        water almost entirely.</p>
+      <p><strong>On looking better dehydrated:</strong> you are right, and you should not chase it.
+        Water under the skin blurs definition, so pulling it out sharpens you for an evening. It
+        is also not a change in your body, it costs you strength, and being chronically
+        under-hydrated will wreck the exact training sessions that are supposed to be building the
+        muscle underneath. Judge the mirror on a normal, well-fed, well-watered day &mdash; that is
+        the body you actually have.</p>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Track this</th><th>How often</th><th>What counts as progress</th></tr></thead>
+        <tbody>
+          <tr><td>7-day average bodyweight</td><td class="num">Weekly</td><td>Down 0.5&ndash;1% of bodyweight per week, no faster</td></tr>
+          <tr><td>Waist at navel</td><td class="num">Weekly</td><td>Any downward drift at all</td></tr>
+          <tr><td>Top set on each exercise</td><td class="num">Every session</td><td>Matched or beaten while cutting</td></tr>
+          <tr><td>Photos, same spot and light</td><td class="num">Every 4 weeks</td><td>The only honest mirror you have</td></tr>
+          <tr><td>Sessions completed</td><td class="num">Rolling</td><td>3&ndash;4 per 7 days, floors included</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="fuel">
+  <div class="wrap stack g-5">
+    <div class="sec-head stack g-2">
+      <span class="eyebrow">Eating on a GLP-1</span>
+      <h2>The drug removes your appetite. It does not remove your protein requirement.</h2>
+    </div>
+    <div class="prose stack g-4 body" style="margin-inline:0">
+      <p>This is the single highest-stakes part of the whole plan. When people lose weight fast
+        without resistance training and without enough protein, a large share of what they lose is
+        lean tissue &mdash; commonly a quarter to a third of the total. You are already solving
+        half of that with the deck. The other half is protein, and appetite suppression is actively
+        working against you.</p>
+      <p><strong>Protein first, at every single meal.</strong> Not a rule about health &mdash; a
+        rule about capacity. You have a small number of bites available per day now. Spend them on
+        the thing that keeps your arms.</p>
+    </div>
+
+    <div class="calc">
+      <div class="calc-field">
+        <label for="gw">Goal bodyweight (lb)</label>
+        <input id="gw" type="number" inputmode="numeric" min="80" max="500" value="195">
+      </div>
+      <div class="calc-out" id="pOut">
+        <span>Daily protein target</span>
+        156&ndash;195 g
+      </div>
+      <div class="calc-out" id="mOut">
+        <span>Which is roughly</span>
+        3 meals of ~52&ndash;65 g
+      </div>
+    </div>
+    <p class="sub" style="max-width:40rem">Based on 0.8&ndash;1.0 g per pound of your
+      <em>goal</em> weight &mdash; the standard target for holding muscle through a deficit. If you
+      can only manage 1,200 calories on a heavy dose day, make 700 of them protein and let the rest
+      fall where it falls.</p>
+
+    <div class="grid2">
+      <div class="tile">
+        <h3>Where it comes from when nothing sounds good</h3>
+        <p>Shakes are legitimate food, not a supplement &mdash; two a day is fine. Greek yogurt,
+          cottage cheese, deli turkey, egg whites, rotisserie chicken. Liquid and cold beat hot and
+          heavy when your stomach is slow.</p>
+      </div>
+      <div class="tile">
+        <h3>Rate of loss</h3>
+        <p>Cap it at <span class="mono">1%</span> of bodyweight per week; <span class="mono">0.5&ndash;0.75%</span>
+          is the sweet spot for keeping muscle. Retatrutide can easily drive faster than that, and
+          faster is exactly where lean mass goes.</p>
+      </div>
+      <div class="tile">
+        <h3>Creatine monohydrate</h3>
+        <p><span class="mono">5 g</span> daily, any time, no loading phase. It is natural, it is
+          the most studied supplement there is, and it does more for you in a deficit than in a
+          surplus.</p>
+      </div>
+      <div class="tile">
+        <h3>Cardio</h3>
+        <p>You do not need it for the deficit &mdash; the drug is handling that. Walk
+          <span class="mono">8&ndash;10k</span> steps because it helps visceral fat, mood and
+          focus. Do not add hard cardio that eats the recovery your lifting needs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stomach">
+  <div class="wrap stack g-5">
+    <div class="sec-head stack g-2">
+      <span class="eyebrow">The honest part</span>
+      <h2>About the stomach</h2>
+    </div>
+    <div class="prose stack g-4 body" style="margin-inline:0">
+      <p><strong>There is no exercise that removes fat from where you do the exercise.</strong>
+        Crunches do not burn stomach fat. If they did, gum would be a jaw treatment. Abdominal work
+        builds abdominal muscle, which is worth doing, but it is not a fat loss tool and every year
+        you spend hoping otherwise is a year lost.</p>
+      <p><strong>Your order of operations is genetic and you do not get to pick it.</strong> You
+        described both parents as carrying weight centrally. That is your map: your body will
+        clear the face, then the arms, then the legs and chest, and it will defend the abdomen
+        until near the end. When you were lean enough to see arm definition, your stomach was
+        always going to still be there. It is not evidence that anything failed.</p>
+      <p><strong>What is actually working in your favor right now.</strong> The class of drug you
+        are on is unusually effective on visceral fat &mdash; the deep abdominal fat that sits
+        behind the wall and pushes it forward. That specific fat often comes off ahead of the
+        subcutaneous layer, which means the shape of your midsection can improve before the pinch
+        test does.</p>
+      <p><strong>And what you control.</strong> Three things move the look of your waist, in this
+        order of speed:</p>
+      <ul class="tight">
+        <li><strong>Lats and side delts</strong> &mdash; contrast. Card B exercise 1 and Card A
+          exercise 4. Fastest visible change available to you.</li>
+        <li><strong>Posture</strong> &mdash; hamstrings and glutes pull your pelvis back under you
+          and your ribs down. Card C exercise 2. A forward pelvic tilt adds visual inches to a
+          stomach that is not actually that big.</li>
+        <li><strong>Continued fat loss</strong> &mdash; slowest, but it is the one that finishes
+          the job. From where you are, abs are likely another 15&ndash;25 lb. The last ten will
+          take as long as the first thirty. That is normal and it is not a sign to change plans.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="deload">
+  <div class="wrap stack g-5">
+    <div class="sec-head stack g-2">
+      <span class="eyebrow">Maintenance</span>
+      <h2>Backing off on purpose, before your body does it for you</h2>
+    </div>
+    <div class="grid2">
+      <div class="tile">
+        <h3>Every 6&ndash;8 weeks, or on the trigger</h3>
+        <p>Run one week of the same cards, the same weights, <strong>half the sets</strong>. Do not
+          take the week off entirely &mdash; for you, stopping is the risk. Keep the habit, drop
+          the load.</p>
+      </div>
+      <div class="tile">
+        <h3>Expect to need it more often</h3>
+        <p>In an aggressive deficit on a GLP-1, recovery is worse than normal. If you feel like you
+          need a light week at 5 weeks, take it at 5 weeks. Nothing in this plan is a schedule.</p>
+      </div>
+      <div class="tile">
+        <h3>Why the volume is deliberately modest</h3>
+        <p>Roughly 10&ndash;14 hard sets per muscle per week is where muscle retention and slow
+          growth live. More is not better while under-fed &mdash; it is just more fatigue. Your
+          short-session preference and the optimal dose happen to agree.</p>
+      </div>
+      <div class="tile">
+        <h3>When you come back after a gap</h3>
+        <p>Two weeks off? Take 10% off your logged numbers for one session, then resume. Two months
+          off? Take 20% off for two sessions. Then you are back. No restart, no penance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap stack g-5">
+    <div class="sec-head stack g-2">
+      <span class="eyebrow">Starting</span>
+      <h2>The first three weeks, exactly</h2>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>When</th><th>Do this</th></tr></thead>
+        <tbody>
+          <tr><td class="num">Next session</td><td>Card A. Pick weights that feel <em>easy</em>. Your only job is to write a number in every box &mdash; that is your baseline, and you cannot progressively overload something you never measured.</td></tr>
+          <tr><td class="num">Session 2</td><td>Card B. Same instruction: establish numbers, do not chase them.</td></tr>
+          <tr><td class="num">Session 3</td><td>Card C. Legs at <strong>2 sets</strong>, stopping 3 reps short of failure. You will still be sore. It will be much worse if you ignore this.</td></tr>
+          <tr><td class="num">Sessions 4&ndash;9</td><td>Deck loops. Now you start adding one rep at a time. Legs move to 3 sets in week 3.</td></tr>
+          <tr><td class="num">Throughout</td><td>Creatine daily. Protein target daily. Liquid carbs before training. Morning weigh-in, weekly average only. Tape at the navel every Sunday.</td></tr>
+          <tr><td class="num">Week 4</td><td>Photos, same spot, same light, same time of day. Compare to today. Not before.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">If you only remember one thing</span>
+      <p style="color:var(--ink-2)">A session where you did two exercises and left is
+        <strong style="color:var(--ink)">infinitely better</strong> than the perfect session you
+        skipped because you did not have 45 minutes. The floor exists so that a bad day still
+        advances the deck. There is no streak to break here &mdash; the only way to fall behind is
+        to stop entirely, and the plan is built so that you never have a good reason to.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap stack g-3">
+    <p>Numbers you type into the boxes are saved in this browser on this device only. They are not
+      sent anywhere and will not follow you to another phone.</p>
+    <p>This is training and nutrition guidance, not medical advice. Anything to do with your
+      retatrutide dosing, side effects, bloodwork or whether to keep going belongs with the
+      clinician prescribing it &mdash; particularly if you start losing weight faster than about
+      1% a week.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var LS = null;
+  try { LS = window.localStorage; LS.setItem("__t","1"); LS.removeItem("__t"); } catch(e){ LS = null; }
+  function get(k){ try { return LS && LS.getItem(k); } catch(e){ return null; } }
+  function set(k,v){ try { if(LS) LS.setItem(k,v); } catch(e){} }
+
+  /* per-exercise "last time" boxes */
+  var inputs = document.querySelectorAll(".ex-log input");
+  Array.prototype.forEach.call(inputs, function(inp){
+    var key = "ncu-log-" + inp.getAttribute("data-k");
+    var saved = get(key);
+    if (saved) inp.value = saved;
+    inp.addEventListener("input", function(){ set(key, inp.value); });
+  });
+
+  /* rotating deck tracker */
+  var CARDS = [
+    { id:"A", name:"Push",        css:"--push" },
+    { id:"B", name:"Pull",        css:"--pull" },
+    { id:"C", name:"Legs + Arms", css:"--legs" }
+  ];
+  var label = document.getElementById("nextCard");
+  var btn   = document.getElementById("doneBtn");
+  var idx   = 0;
+  var savedIdx = parseInt(get("ncu-next"), 10);
+  if (!isNaN(savedIdx) && savedIdx >= 0 && savedIdx < CARDS.length) idx = savedIdx;
+
+  function render(){
+    var c = CARDS[idx];
+    label.textContent = c.id + " · " + c.name;
+    label.style.color = "var(" + c.css + ")";
+    btn.setAttribute("aria-label", "Mark card " + c.id + " done and advance to the next card");
+  }
+  btn.addEventListener("click", function(){
+    idx = (idx + 1) % CARDS.length;
+    set("ncu-next", String(idx));
+    render();
+  });
+  render();
+
+  /* protein target */
+  var gw = document.getElementById("gw");
+  var pOut = document.getElementById("pOut");
+  var mOut = document.getElementById("mOut");
+  function calc(){
+    var w = parseFloat(gw.value);
+    if (!isFinite(w) || w <= 0) { w = 0; }
+    var lo = Math.round(w * 0.8), hi = Math.round(w * 1.0);
+    pOut.innerHTML = "<span>Daily protein target</span>" + (w ? lo + "–" + hi + " g" : "—");
+    mOut.innerHTML = "<span>Which is roughly</span>" +
+      (w ? "3 meals of ~" + Math.round(lo/3) + "–" + Math.round(hi/3) + " g" : "—");
+    set("ncu-goalweight", gw.value);
+  }
+  var savedW = get("ncu-goalweight");
+  if (savedW) gw.value = savedW;
+  gw.addEventListener("input", calc);
+  calc();
+})();
+</script>
